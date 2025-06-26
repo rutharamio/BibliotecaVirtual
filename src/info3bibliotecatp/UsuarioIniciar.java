@@ -4,8 +4,13 @@
  */
 package info3bibliotecatp;
 
-import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
 
+import java.io.IOException;
 /**
  *
  * @author MSI
@@ -137,26 +142,17 @@ public class UsuarioIniciar extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-    String usuario = jTextField1.getText();
-    String contrasena = new String(jPasswordField2.getPassword());
+        String usuario = jTextField1.getText();
+        String contrasena = new String(jPasswordField2.getPassword());
 
-    try {
-        if (GestionUsuarios.verificarLogin(usuario, contrasena)) {
-            javax.swing.JOptionPane.showMessageDialog(this, "¡Bienvenido/a " + usuario + "!");
-            // new BibliotecaVentana().setVisible(true);
-            // this.dispose();
+        if (iniciarSesion(usuario, contrasena)) {
             BibliotecaVentana ventana = new BibliotecaVentana(usuario);
             ventana.setVisible(true);
-
             this.dispose();
-        } else {
-            javax.swing.JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
         }
-    } catch (IOException e) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Error al verificar el usuario");
-    }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jPasswordField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jPasswordField2ActionPerformed
@@ -168,53 +164,48 @@ public class UsuarioIniciar extends javax.swing.JFrame {
         String usuario = jTextField1.getText();
         String contrasena = new String(jPasswordField2.getPassword());
 
-    try {
-    boolean registrado = GestionUsuarios.registrarUsuario(usuario, contrasena);
-    if (registrado) {
-        javax.swing.JOptionPane.showMessageDialog(this, "¡Usuario registrado con éxito!");
-    } else {
-        javax.swing.JOptionPane.showMessageDialog(this, "Ese usuario ya existe, elija otro.");
-    }
-    } catch (IOException e) {
-    javax.swing.JOptionPane.showMessageDialog(this, "Error al registrar usuario.");
-    }
+        try {
+            boolean registrado = GestionUsuarios.registrarUsuario(usuario, contrasena);
+            if (registrado) {
+                JOptionPane.showMessageDialog(this, "¡Usuario registrado con éxito!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Ese usuario ya existe, elija otro.");
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error al registrar usuario.");
+        }
     }//GEN-LAST:event_jButton2ActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(UsuarioIniciar.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(UsuarioIniciar.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(UsuarioIniciar.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(UsuarioIniciar.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+    private boolean iniciarSesion(String nombreUsuario, String contrasena) {
+        Connection conn = Conexion.conectar();
+        if (conn != null) {
+            try {
+                String sql = "SELECT * FROM usuarios WHERE nombre_usuario = ? AND \"contraseña\" = ?";
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, nombreUsuario.trim());
+                stmt.setString(2, contrasena.trim());
+                System.out.println("Usuario ingresado: '" + nombreUsuario + "'");
+                System.out.println("Contraseña ingresada: '" + contrasena + "'");
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new UsuarioIniciar().setVisible(true);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    boolean esAdmin = rs.getBoolean("es_admin");
+                    JOptionPane.showMessageDialog(this, "Inicio de sesión exitoso. Es admin: " + esAdmin);
+                    return true;
+                } else {
+                    JOptionPane.showMessageDialog(this, "Nombre de usuario o contraseña incorrectos.");
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Error al iniciar sesión: " + e.getMessage());
             }
-        });
+        }
+        return false;
     }
 
+    public static void main(String args[]) {
+        java.awt.EventQueue.invokeLater(() -> new UsuarioIniciar().setVisible(true));
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
