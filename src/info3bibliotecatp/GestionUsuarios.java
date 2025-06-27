@@ -3,50 +3,41 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package info3bibliotecatp;
-import java.io.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 /**
  *
  * @author MSI
  */
 public class GestionUsuarios {
 
-    private static final String ARCHIVO = "usuarios.txt";
+    public static boolean registrarUsuario(String nombre, String contrasena) {
+        Connection conn = Conexion.conectar();
+        if (conn != null) {
+            try {
+                // Verificar si el usuario ya existe
+                String consulta = "SELECT * FROM usuarios WHERE nombre_usuario = ?";
+                PreparedStatement checkStmt = conn.prepareStatement(consulta);
+                checkStmt.setString(1, nombre);
+                ResultSet rs = checkStmt.executeQuery();
+                if (rs.next()) {
+                    return false; // Ya existe
+                }
 
-    public static boolean registrarUsuario(String nombre, String contrasena) throws IOException {
-        List<String> usuarios = leerUsuarios();
-        for (String linea : usuarios) {
-        if (linea.trim().isEmpty()) continue; // <- evita líneas vacías
-
-        String[] partes = linea.split(",");
-        if (partes.length >= 2 && partes[0].equalsIgnoreCase(nombre)) {
-        return false; // Ya existe
-        }
-       }
-
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(ARCHIVO, true))) {
-            bw.write(nombre + "," + contrasena);
-            bw.newLine();
-        }
-
-        return true;
-    }
-
-    public static boolean verificarLogin(String nombre, String contrasena) throws IOException {
-        List<String> usuarios = leerUsuarios();
-        for (String linea : usuarios) {
-            String[] partes = linea.split(",");
-            if (partes.length == 2 && partes[0].equals(nombre) && partes[1].equals(contrasena)) {
+                // Insertar nuevo usuario
+                String sql = "INSERT INTO usuarios (nombre_usuario, \"contraseña\") VALUES (?, ?)";
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, nombre);
+                stmt.setString(2, contrasena);
+                stmt.executeUpdate();
                 return true;
+
+            } catch (SQLException e) {
+                System.out.println("Error al registrar usuario: " + e.getMessage());
             }
         }
         return false;
-    }
-
-    private static List<String> leerUsuarios() throws IOException {
-        File file = new File(ARCHIVO);
-        if (!file.exists()) file.createNewFile();
-
-        return java.nio.file.Files.readAllLines(file.toPath());
     }
 }

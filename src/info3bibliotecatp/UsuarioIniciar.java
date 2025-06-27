@@ -164,15 +164,11 @@ public class UsuarioIniciar extends javax.swing.JFrame {
         String usuario = jTextField1.getText();
         String contrasena = new String(jPasswordField2.getPassword());
 
-        try {
-            boolean registrado = GestionUsuarios.registrarUsuario(usuario, contrasena);
-            if (registrado) {
-                JOptionPane.showMessageDialog(this, "¡Usuario registrado con éxito!");
-            } else {
-                JOptionPane.showMessageDialog(this, "Ese usuario ya existe, elija otro.");
-            }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error al registrar usuario.");
+        boolean registrado = GestionUsuarios.registrarUsuario(usuario, contrasena);
+        if (registrado) {
+            JOptionPane.showMessageDialog(this, "¡Usuario registrado con éxito!");
+        } else {
+            JOptionPane.showMessageDialog(this, "Ese usuario ya existe, elija otro.");
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -190,7 +186,7 @@ public class UsuarioIniciar extends javax.swing.JFrame {
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
                     boolean esAdmin = rs.getBoolean("es_admin");
-                    JOptionPane.showMessageDialog(this, "Inicio de sesión exitoso. Es admin: " + esAdmin);
+                    JOptionPane.showMessageDialog(this, "Inicio de sesión exitoso.");
                     return true;
                 } else {
                     JOptionPane.showMessageDialog(this, "Nombre de usuario o contraseña incorrectos.");
