@@ -26,12 +26,14 @@ public class BibliotecaVentana extends javax.swing.JFrame {
 
     public BibliotecaVentana(String nombreUsuario, int idUsuario, boolean esAdmin) {
     initComponents();
-    jLabel1.setText("Biblioteca personal de: " + nombreUsuario);
     this.nombreUsuario = nombreUsuario;
     this.idUsuario=idUsuario;
     this.esAdmin=esAdmin;
+    jLabel1.setText("Biblioteca personal de: " + nombreUsuario);
+    jButton1.setVisible(esAdmin);
     List<Libro>libros=GestionBiblioteca.cargarLibros(idUsuario);
     mostrarLibros(libros);
+    cargarLibros();
     cargarLibrosDisponibles();
     }
     
