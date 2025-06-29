@@ -11,46 +11,39 @@ import java.nio.file.StandardCopyOption;
 import java.awt.Desktop;
 import java.io.File;
 import javax.swing.JOptionPane;
-
+import java.util.List;
 /**
  *
  * @author MSI
  */
 public class BibliotecaVentana extends javax.swing.JFrame {
-
     /**
      * Creates new form BibliotecaVentana
      */
-    public BibliotecaVentana() {
-        initComponents();
-    }
     private String nombreUsuario;
+    private int idUsuario;
+    private boolean esAdmin;
 
-    public BibliotecaVentana(String nombreUsuario) {
-    this.nombreUsuario = nombreUsuario;
+    public BibliotecaVentana(String nombreUsuario, int idUsuario, boolean esAdmin) {
     initComponents();
-    setTitle("Biblioteca de " + nombreUsuario);
-    jLabel1.setText("Biblioteca de: " + nombreUsuario);
-        // Ocultar botón si no es admin
-    if (!nombreUsuario.equals("admin")) {
-        jButton1.setVisible(false);
-    }
-    cargarLibros();
+    jLabel1.setText("Biblioteca personal de: " + nombreUsuario);
+    this.nombreUsuario = nombreUsuario;
+    this.idUsuario=idUsuario;
+    this.esAdmin=esAdmin;
+    List<Libro>libros=GestionBiblioteca.cargarLibros(idUsuario);
+    mostrarLibros(libros);
     cargarLibrosDisponibles();
-    
-    jList2.addMouseListener(new java.awt.event.MouseAdapter() {
-        public void mouseClicked(java.awt.event.MouseEvent evt) {
-            if (evt.getClickCount() == 2) {
-                String archivoSeleccionado = jList2.getSelectedValue();
-                abrirPDF(archivoSeleccionado);
-            }
-        }
-    });
-    
     }
+    
+    private void mostrarLibros(List<Libro> libros) {
+    for (Libro libro : libros) {
+        System.out.println("Título: " + libro.getTitulo());
+    }
+}
+
     private void cargarLibros() {
     try {
-        java.util.List<Libro> libros = GestionBiblioteca.cargarLibros(nombreUsuario);
+        java.util.List<Libro> libros = GestionBiblioteca.cargarLibros(idUsuario);
         javax.swing.DefaultListModel<String> modelo = new javax.swing.DefaultListModel<>();
         for (Libro libro : libros) {
             modelo.addElement(libro.toString());
@@ -61,15 +54,26 @@ public class BibliotecaVentana extends javax.swing.JFrame {
     }
     }
 
-    private void cargarLibrosDisponibles() {
+private void cargarLibrosDisponibles() {
     try {
         File carpeta = new File("pdfs");
         File[] archivos = carpeta.listFiles((dir, name) -> name.toLowerCase().endsWith(".pdf"));
-        
+
         DefaultListModel<String> modelo = new DefaultListModel<>();
         if (archivos != null) {
             for (File archivo : archivos) {
-                modelo.addElement(archivo.getName());
+                String nombreArchivo = archivo.getName();
+                modelo.addElement(nombreArchivo);
+
+                // Revisamos si ya existe en la base
+                int idLibro = GestionBiblioteca.obtenerIdLibroPorArchivo(nombreArchivo);
+                if (idLibro == -1) {
+                    // Insertamos automáticamente si no está
+                    String titulo = nombreArchivo.replace(".pdf", "");
+                    String ruta = archivo.getAbsolutePath();
+                    String autor = "Desconocido";
+                    GestionBiblioteca.insertarLibroEnBaseDeDatos(titulo, autor, ruta, "");
+                }
             }
         }
         jList2.setModel(modelo);
@@ -227,6 +231,11 @@ public class BibliotecaVentana extends javax.swing.JFrame {
         File destino = new File(carpetaDestino, archivoSeleccionado.getName());
         try {
             Files.copy(archivoSeleccionado.toPath(), destino.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            String titulo = archivoSeleccionado.getName().replace(".pdf", "");
+            String ruta = destino.getAbsolutePath();
+            String autor = "Desconocido"; // o podrías usar: JOptionPane.showInputDialog("Autor del libro:");
+            GestionBiblioteca.insertarLibroEnBaseDeDatos(titulo, autor, ruta, ""); // portada vacía por ahora
+
             JOptionPane.showMessageDialog(this, "PDF subido correctamente.");
             cargarLibrosDisponibles(); // Actualizar la pestaña de "Libros Disponibles"
         } catch (IOException e) {
@@ -244,15 +253,17 @@ public class BibliotecaVentana extends javax.swing.JFrame {
         return;
     }
 
+    int idLibro = GestionBiblioteca.obtenerIdLibroPorArchivo(libroSeleccionado);
+    
     try {
-        // Guardar el libro en el archivo del usuario
-        GestionBiblioteca.agregarLibro(nombreUsuario, libroSeleccionado);
-
-        // Refrescar la lista de "Mi biblioteca"
-        cargarLibros();
-
-        JOptionPane.showMessageDialog(this, "Libro agregado a tu biblioteca.");
-    } catch (IOException e) {
+        if (idLibro!=-1){
+            GestionBiblioteca.agregarLibroABiblioteca(idUsuario, idLibro);
+            cargarLibros();
+            JOptionPane.showMessageDialog(this, "Libro agregado a tu biblioteca.");
+        } else {
+            JOptionPane.showMessageDialog(this, "No se encontro el libro en la base de datos.");
+        }
+    } catch (Exception e) {
         JOptionPane.showMessageDialog(this, "Error al agregar el libro: " + e.getMessage());
     }
     }//GEN-LAST:event_jButton2ActionPerformed
@@ -260,37 +271,6 @@ public class BibliotecaVentana extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(BibliotecaVentana.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(BibliotecaVentana.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(BibliotecaVentana.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(BibliotecaVentana.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new BibliotecaVentana().setVisible(true);
-            }
-        });
-    }
 
     private void abrirPDF(String nombreArchivo) {
     try {

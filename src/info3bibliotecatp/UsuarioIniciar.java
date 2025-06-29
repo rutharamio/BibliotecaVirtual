@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.swing.JOptionPane;
 
-import java.io.IOException;
 /**
  *
  * @author MSI
@@ -148,11 +147,7 @@ public class UsuarioIniciar extends javax.swing.JFrame {
         String usuario = jTextField1.getText();
         String contrasena = new String(jPasswordField2.getPassword());
 
-        if (iniciarSesion(usuario, contrasena)) {
-            BibliotecaVentana ventana = new BibliotecaVentana(usuario);
-            ventana.setVisible(true);
-            this.dispose();
-        }
+        iniciarSesion(usuario, contrasena);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jPasswordField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jPasswordField2ActionPerformed
@@ -176,7 +171,7 @@ public class UsuarioIniciar extends javax.swing.JFrame {
         Connection conn = Conexion.conectar();
         if (conn != null) {
             try {
-                String sql = "SELECT * FROM usuarios WHERE nombre_usuario = ? AND \"contraseña\" = ?";
+                String sql = "SELECT id, es_admin FROM Usuarios WHERE nombre_usuario = ? AND \"contraseña\" = ?";
                 PreparedStatement stmt = conn.prepareStatement(sql);
                 stmt.setString(1, nombreUsuario.trim());
                 stmt.setString(2, contrasena.trim());
@@ -185,8 +180,15 @@ public class UsuarioIniciar extends javax.swing.JFrame {
 
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
+                    int idUsuario = rs.getInt("id");
                     boolean esAdmin = rs.getBoolean("es_admin");
+                    
                     JOptionPane.showMessageDialog(this, "Inicio de sesión exitoso.");
+                    
+                    BibliotecaVentana ventana = new BibliotecaVentana(nombreUsuario,idUsuario,esAdmin);
+                    ventana.setVisible(true);
+                    this.dispose();
+                    
                     return true;
                 } else {
                     JOptionPane.showMessageDialog(this, "Nombre de usuario o contraseña incorrectos.");
