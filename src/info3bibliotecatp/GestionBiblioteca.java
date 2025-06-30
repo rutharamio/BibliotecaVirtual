@@ -5,6 +5,7 @@
 package info3bibliotecatp;
 import java.util.*;
 import java.sql.*;
+import javax.swing.JOptionPane;
 /**
  *
  * @author MSI
@@ -98,20 +99,42 @@ public static int obtenerIdLibroPorArchivo(String nombreArchivo) {
     return -1;
 }
 
-public static void agregarLibroABiblioteca(int idUsuario, int idLibro) {
+public static boolean agregarLibroABiblioteca(int idUsuario, int idLibro) {
     Connection con = Conexion.conectar();
     if (con != null) {
         try {
+            System.out.println("Intentando agregar id_libro=" + idLibro + " para id_usuario=" + idUsuario);
+
+            // Verificar si ya está en la biblioteca
+            String checkSql = "SELECT COUNT(*) FROM biblioteca_usuarios WHERE id_usuario = ? AND id_libro = ?";
+            PreparedStatement checkStmt = con.prepareStatement(checkSql);
+            checkStmt.setInt(1, idUsuario);
+            checkStmt.setInt(2, idLibro);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                rs.close();
+                checkStmt.close();
+                con.close();
+                return false; // ya existe
+            }
+            rs.close();
+            checkStmt.close();
+
+            // Insertar si no está
             String sql = "INSERT INTO biblioteca_usuarios (id_usuario, id_libro) VALUES (?, ?)";
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setInt(1, idUsuario);
             stmt.setInt(2, idLibro);
             stmt.executeUpdate();
+
             stmt.close();
             con.close();
-        } catch (SQLException e) {
-            System.out.println("Error al agregar libro a la biblioteca: " + e.getMessage());
-        }
+            return true; // agregado correctamente
+    }       catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al agregar libro a la biblioteca: " + e.getMessage());
+            return false;
     }
+    }
+    return false;
 }
 }

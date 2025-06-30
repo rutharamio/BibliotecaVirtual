@@ -9,7 +9,7 @@ package info3bibliotecatp;
  * @author MSI
  */
 public class Libro {
-     private String titulo;
+    private String titulo;
     private String autor;
 
     public Libro(String titulo, String autor) {
@@ -22,7 +22,10 @@ public class Libro {
 
     @Override
     public String toString() {
-        return titulo + " - " + autor;
+    if (autor.equalsIgnoreCase("Desconocido")) {
+        return titulo;
     }
+    return titulo + " Autor " + autor;
+}
 }
 

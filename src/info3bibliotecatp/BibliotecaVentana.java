@@ -35,6 +35,9 @@ public class BibliotecaVentana extends javax.swing.JFrame {
     mostrarLibros(libros);
     cargarLibros();
     cargarLibrosDisponibles();
+    System.out.println("Usuario: " + nombreUsuario);
+    System.out.println("esAdmin: " + esAdmin);
+
     }
     
     private void mostrarLibros(List<Libro> libros) {
@@ -73,7 +76,7 @@ private void cargarLibrosDisponibles() {
                     // Insertamos automáticamente si no está
                     String titulo = nombreArchivo.replace(".pdf", "");
                     String ruta = archivo.getAbsolutePath();
-                    String autor = "Desconocido";
+                    String autor = "";
                     GestionBiblioteca.insertarLibroEnBaseDeDatos(titulo, autor, ruta, "");
                 }
             }
@@ -215,10 +218,6 @@ private void cargarLibrosDisponibles() {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
 
-        if (!nombreUsuario.equals("admin")) {
-            JOptionPane.showMessageDialog(this, "Solo el administrador puede subir archivos.");
-            return;
-        }
          JFileChooser fileChooser = new JFileChooser();
     fileChooser.setDialogTitle("Seleccionar archivo PDF");
     FileNameExtensionFilter filtro = new FileNameExtensionFilter("Archivos PDF", "pdf");
@@ -248,7 +247,7 @@ private void cargarLibrosDisponibles() {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-            String libroSeleccionado = jList2.getSelectedValue();
+    String libroSeleccionado = jList2.getSelectedValue();
 
     if (libroSeleccionado == null) {
         JOptionPane.showMessageDialog(this, "Seleccioná un libro primero.");
@@ -258,12 +257,16 @@ private void cargarLibrosDisponibles() {
     int idLibro = GestionBiblioteca.obtenerIdLibroPorArchivo(libroSeleccionado);
     
     try {
-        if (idLibro!=-1){
-            GestionBiblioteca.agregarLibroABiblioteca(idUsuario, idLibro);
-            cargarLibros();
-            JOptionPane.showMessageDialog(this, "Libro agregado a tu biblioteca.");
+        if (idLibro != -1) {
+            boolean agregado = GestionBiblioteca.agregarLibroABiblioteca(idUsuario, idLibro);
+            if (agregado) {
+                cargarLibros(); //agrega a la biblioteca personal.
+                JOptionPane.showMessageDialog(this, "Libro agregado a tu biblioteca.");
+            } else {
+                JOptionPane.showMessageDialog(this, "Este libro ya está en tu biblioteca.");
+            }
         } else {
-            JOptionPane.showMessageDialog(this, "No se encontro el libro en la base de datos.");
+            JOptionPane.showMessageDialog(this, "No se encontró el libro en la base de datos.");
         }
     } catch (Exception e) {
         JOptionPane.showMessageDialog(this, "Error al agregar el libro: " + e.getMessage());
