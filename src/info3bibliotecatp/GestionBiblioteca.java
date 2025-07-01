@@ -17,7 +17,7 @@ public class GestionBiblioteca {
 
     if (conn != null) {
         try {
-            String sql = "SELECT l.id, l.titulo, l.autor " +
+            String sql = "SELECT l.id, l.titulo, l.autor,l.ruta_pdf, bu.ruta_portada " +
                          "FROM biblioteca_usuarios bu " +
                          "JOIN libros l ON bu.id_libro = l.id " +
                          "WHERE bu.id_usuario = ?";
@@ -27,7 +27,13 @@ public class GestionBiblioteca {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                Libro libro = new Libro(rs.getString("titulo"), rs.getString("autor"));
+                Libro libro = new Libro(
+                rs.getString("titulo"),
+                rs.getString("autor"),
+                rs.getString("ruta_pdf"),
+                rs.getString("ruta_portada")
+            );
+    
                 libros.add(libro);
             }
 
@@ -62,23 +68,22 @@ public class GestionBiblioteca {
         }
     }
     
-    public static void insertarLibroEnBaseDeDatos(String titulo, String autor, String rutaPdf, String portada) {
-    Connection con = Conexion.conectar();
-    if (con != null) {
-        try {
-            String sql = "INSERT INTO libros (titulo, autor, ruta_pdf, portada) VALUES (?, ?, ?, ?)";
-            PreparedStatement stmt = con.prepareStatement(sql);
+    public static boolean insertarLibroEnBaseDeDatos(String titulo, String autor, String rutaPdf, String rutaPortada) {
+    String sql = "INSERT INTO libros (titulo, autor, ruta_pdf, ruta_portada) VALUES (?, ?, ?, ?)";
+    
+        try(Connection conn = Conexion.conectar()) {
+            
+            PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, titulo);
             stmt.setString(2, autor);
             stmt.setString(3, rutaPdf);
-            stmt.setString(4, portada);
-            stmt.executeUpdate();
-            stmt.close();
-            con.close();
+            stmt.setString(4, rutaPortada);
+            return stmt.executeUpdate()>0;
         } catch (SQLException e) {
-            System.out.println("Error al insertar libro: " + e.getMessage());
-        }
+         e.printStackTrace();
+        return false;
     }
+    
 }
 
 public static int obtenerIdLibroPorArchivo(String nombreArchivo) {
@@ -99,7 +104,7 @@ public static int obtenerIdLibroPorArchivo(String nombreArchivo) {
     return -1;
 }
 
-public static boolean agregarLibroABiblioteca(int idUsuario, int idLibro) {
+public static boolean agregarLibroABiblioteca(int idUsuario, int idLibro, String rutaPortadaOriginal) {
     Connection con = Conexion.conectar();
     if (con != null) {
         try {
@@ -120,21 +125,105 @@ public static boolean agregarLibroABiblioteca(int idUsuario, int idLibro) {
             rs.close();
             checkStmt.close();
 
-            // Insertar si no está
-            String sql = "INSERT INTO biblioteca_usuarios (id_usuario, id_libro) VALUES (?, ?)";
+            // Insertar incluyendo la portada
+            String sql = "INSERT INTO biblioteca_usuarios (id_usuario, id_libro, ruta_portada) VALUES (?, ?, ?)";
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setInt(1, idUsuario);
             stmt.setInt(2, idLibro);
+            stmt.setString(3, rutaPortadaOriginal); // ⚠️ nueva línea clave
             stmt.executeUpdate();
 
             stmt.close();
             con.close();
             return true; // agregado correctamente
-    }       catch (SQLException e) {
+        } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al agregar libro a la biblioteca: " + e.getMessage());
             return false;
-    }
+        }
     }
     return false;
 }
+
+public static boolean actualizarPortadaLibroUsuario(int idUsuario, int idLibro, String rutaImagen) {
+    String sql = "UPDATE biblioteca_usuarios SET ruta_portada = ? WHERE id_usuario = ? AND id_libro = ?";
+    try (Connection conn = Conexion.conectar();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, rutaImagen);
+        stmt.setInt(2, idUsuario);
+        stmt.setInt(3, idLibro);
+        return stmt.executeUpdate() > 0;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+public static Libro obtenerLibroPorId(int idLibro) {
+    String sql = "SELECT titulo, autor, ruta_pdf, ruta_portada FROM libros WHERE id = ?";
+    try (Connection conn = Conexion.conectar();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, idLibro);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return new Libro(
+    rs.getString("titulo"),
+    rs.getString("autor"),
+    rs.getString("ruta_pdf"),
+    rs.getString("ruta_portada")
+);
+
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return null;
+}
+
+public static int obtenerIdLibroPorTitulo(String titulo) {
+    String sql = "SELECT id FROM libros WHERE titulo = ?";
+    try (Connection conn = Conexion.conectar();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, titulo);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return rs.getInt("id");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return -1;
+}
+
+public static String obtenerRutaPortadaOriginal(int idLibro) {
+    String sql = "SELECT ruta_portada FROM libros WHERE id = ?";
+    try (Connection conn = Conexion.conectar();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, idLibro);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return rs.getString("ruta_portada");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return "";
+}
+
+public static Libro obtenerLibroPorTitulo(String titulo) {
+    String sql = "SELECT * FROM libros WHERE titulo = ?";
+    try (Connection conn = Conexion.conectar()) {
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        stmt.setString(1, titulo);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            String autor = rs.getString("autor");
+            String rutaPdf = rs.getString("ruta_pdf");
+            String rutaPortada = rs.getString("ruta_portada");
+            return new Libro(titulo, autor, rutaPdf, rutaPortada);
+        }
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Error al buscar libro por título: " + e.getMessage());
+    }
+    return null;
+}
+
 }

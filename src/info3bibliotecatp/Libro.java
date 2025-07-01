@@ -11,14 +11,34 @@ package info3bibliotecatp;
 public class Libro {
     private String titulo;
     private String autor;
+    private String rutaPortada;
+    private String rutaPDF;
 
-    public Libro(String titulo, String autor) {
+    public Libro(String titulo, String autor, String rutaPDF, String rutaPortada) {
         this.titulo = titulo;
         this.autor = autor;
+        this.rutaPortada=rutaPortada;
+        this.rutaPDF= rutaPDF;
     }
 
     public String getTitulo() { return titulo; }
     public String getAutor() { return autor; }
+    
+    public String getRutaPortada() {
+    return rutaPortada;
+}
+
+    public String getRutaPDF() {
+        return rutaPDF;
+    }
+
+    public void setRutaPDF(String rutaPDF) {
+        this.rutaPDF = rutaPDF;
+    }
+
+    public void setRutaPortada(String rutaPortada) {
+        this.rutaPortada = rutaPortada;
+    }
 
     @Override
     public String toString() {
