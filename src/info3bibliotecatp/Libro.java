@@ -9,16 +9,26 @@ package info3bibliotecatp;
  * @author MSI
  */
 public class Libro {
+    private int idLibro;
     private String titulo;
     private String autor;
     private String rutaPortada;
     private String rutaPDF;
 
-    public Libro(String titulo, String autor, String rutaPDF, String rutaPortada) {
+    public Libro(int idLibro,String titulo, String autor, String rutaPDF, String rutaPortada) {
+        this.idLibro=idLibro;
         this.titulo = titulo;
         this.autor = autor;
         this.rutaPortada=rutaPortada;
         this.rutaPDF= rutaPDF;
+    }
+
+    public int getIdLibro() {
+        return idLibro;
+    }
+
+    public void setIdLibro(int idLibro) {
+        this.idLibro = idLibro;
     }
 
     public String getTitulo() { return titulo; }

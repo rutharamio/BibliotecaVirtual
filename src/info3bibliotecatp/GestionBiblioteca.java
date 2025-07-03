@@ -28,6 +28,7 @@ public class GestionBiblioteca {
 
             while (rs.next()) {
                 Libro libro = new Libro(
+                rs.getInt("id"),
                 rs.getString("titulo"),
                 rs.getString("autor"),
                 rs.getString("ruta_pdf"),
@@ -165,6 +166,7 @@ public static Libro obtenerLibroPorId(int idLibro) {
         ResultSet rs = stmt.executeQuery();
         if (rs.next()) {
             return new Libro(
+    idLibro,
     rs.getString("titulo"),
     rs.getString("autor"),
     rs.getString("ruta_pdf"),
@@ -218,12 +220,67 @@ public static Libro obtenerLibroPorTitulo(String titulo) {
             String autor = rs.getString("autor");
             String rutaPdf = rs.getString("ruta_pdf");
             String rutaPortada = rs.getString("ruta_portada");
-            return new Libro(titulo, autor, rutaPdf, rutaPortada);
+            int id = rs.getInt("id");
+            return new Libro(id,titulo, autor, rutaPdf, rutaPortada);
         }
     } catch (SQLException e) {
         JOptionPane.showMessageDialog(null, "Error al buscar libro por título: " + e.getMessage());
     }
     return null;
+}
+
+public static List<Libro> obtenerTodosLosLibros() {
+    List<Libro> listaLibros = new ArrayList<>();
+
+    String sql = "SELECT * FROM libros"; 
+
+    try (Connection conn = Conexion.conectar();
+         PreparedStatement stmt = conn.prepareStatement(sql);
+         ResultSet rs = stmt.executeQuery()) {
+
+        while (rs.next()) {
+            int id = rs.getInt("id");
+            String titulo = rs.getString("titulo");
+            String autor = rs.getString("autor");
+            String rutaArchivo = rs.getString("ruta_archivo");
+            String rutaPortada = rs.getString("ruta_portada");
+
+            Libro libro = new Libro(id, titulo, autor, rutaArchivo, rutaPortada);
+            listaLibros.add(libro);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return listaLibros;
+}
+
+public static List<Libro> obtenerLibrosDisponibles() {
+    List<Libro> libros = new ArrayList<>();
+
+    String sql = "SELECT * FROM libros";
+
+    try (Connection conn = Conexion.conectar();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(sql)) {
+
+        while (rs.next()) {
+            Libro libro = new Libro(
+                rs.getInt("id"),
+                rs.getString("titulo"),
+                rs.getString("autor"),
+                rs.getString("ruta_pdf"),
+                rs.getString("ruta_portada")
+            );
+            libros.add(libro);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return libros;
 }
 
 }
