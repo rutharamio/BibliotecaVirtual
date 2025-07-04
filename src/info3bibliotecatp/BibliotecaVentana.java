@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package info3bibliotecatp;
+import java.awt.BorderLayout;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import javax.swing.JOptionPane;
 import java.util.List;
 import java.awt.Image;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import javax.swing.ImageIcon;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -35,7 +37,16 @@ public class BibliotecaVentana extends javax.swing.JFrame {
     private boolean esAdmin;
 
     public BibliotecaVentana(String nombreUsuario, int idUsuario, boolean esAdmin) {
+    jPanel1 = new FondoPanelMiBiblioteca();
+    jPanel2 = new FondoPanelLibrosDisp();
+    
     initComponents();
+    
+    jPanel1.setLayout(new BorderLayout());
+    jPanel2.setLayout(new BorderLayout());
+
+    setSize(900, 600);
+    setLocationRelativeTo(null);
     
     this.listaLibrosDisponibles = new ArrayList<>();
     this.nombreUsuario = nombreUsuario;
@@ -183,14 +194,12 @@ System.out.println("esAdmin: " + esAdmin);
     private void initComponents() {
 
         jTabbedPane1 = new javax.swing.JTabbedPane();
-        jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jButton3 = new javax.swing.JButton();
         jLabelportada1 = new javax.swing.JLabel();
         labeltitulo2 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         ComentarLiibro = new javax.swing.JButton();
-        jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jButton2 = new javax.swing.JButton();
         jLabelPortada = new javax.swing.JLabel();
@@ -601,7 +610,6 @@ private void agregarDobleClickParaAbrirPDF(JList<Libro> lista) {
         }
     });
 }
-
     private List<Libro> listaLibrosDisponibles;
     private DefaultListModel<Libro> modeloLibros;
     private JList<Libro> jList1;
@@ -627,4 +635,35 @@ private void agregarDobleClickParaAbrirPDF(JList<Libro> lista) {
     private javax.swing.JLabel labeltitulo2;
     private javax.swing.JButton verComentariosLibros;
     // End of variables declaration//GEN-END:variables
+}
+// Panel con fondo adaptativo para Mi Biblioteca
+class FondoPanelMiBiblioteca extends JPanel {
+    private Image fondo;
+
+    public FondoPanelMiBiblioteca() {
+        ImageIcon icon = new ImageIcon(getClass().getResource("/info3bibliotecatp/Imagenes/bookish (3).png"));
+        fondo = icon.getImage();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.drawImage(fondo, 0, 0, getWidth(), getHeight(), this);
+    }
+}
+
+// Panel con fondo adaptativo para Libros Disponibles
+class FondoPanelLibrosDisp extends JPanel {
+    private Image fondo;
+
+    public FondoPanelLibrosDisp() {
+        ImageIcon icon = new ImageIcon(getClass().getResource("/info3bibliotecatp/Imagenes/bookish (6).png"));
+        fondo = icon.getImage();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.drawImage(fondo, 0, 0, getWidth(), getHeight(), this);
+    }
 }

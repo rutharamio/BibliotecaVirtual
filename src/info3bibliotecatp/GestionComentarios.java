@@ -11,6 +11,7 @@ package info3bibliotecatp;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 
 public class GestionComentarios {
 
@@ -59,18 +60,23 @@ public class GestionComentarios {
     }
     
     public static void insertarPuntuacion(int idUsuario, int idLibro, int puntuacion) {
-    String sql = "INSERT INTO calificaciones(id_usuario, id_libro, puntuacion) VALUES (?, ?, ?)";
+    String sql = "INSERT INTO calificaciones (id_usuario, id_libro, puntuacion) " +
+                 "VALUES (?, ?, ?) " +
+                 "ON CONFLICT (id_usuario, id_libro) " +
+                 "DO UPDATE SET puntuacion = EXCLUDED.puntuacion;";
 
-    try (Connection con = Conexion.conectar();
-         PreparedStatement ps = con.prepareStatement(sql)) {
+    try (Connection conn = Conexion.conectar();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-        ps.setInt(1, idUsuario);
-        ps.setInt(2, idLibro);
-        ps.setInt(3, puntuacion);
-        ps.executeUpdate();
+        stmt.setInt(1, idUsuario);
+        stmt.setInt(2, idLibro);
+        stmt.setInt(3, puntuacion);
 
+        stmt.executeUpdate();
+
+        JOptionPane.showMessageDialog(null, "Puntuación guardada correctamente.");
     } catch (SQLException e) {
-        e.printStackTrace();
+        JOptionPane.showMessageDialog(null, "Error al guardar la puntuación: " + e.getMessage());
     }
 }
 
@@ -94,6 +100,5 @@ public class GestionComentarios {
 
     return promedio;
 }
-
 }
 

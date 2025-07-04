@@ -3,15 +3,18 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/C:/Users/Crist/Desktop/trabajos_java/Info3BibliotecaTP/src/info3bibliotecatp/ComentariosVentana.java</file>
             <file>file:/C:/Users/Crist/Desktop/trabajos_java/Info3BibliotecaTP/src/info3bibliotecatp/PruebaConexion.java</file>
             <file>file:/C:/Users/Crist/Desktop/trabajos_java/Info3BibliotecaTP/src/info3bibliotecatp/Libro.java</file>
             <file>file:/C:/Users/Crist/Desktop/trabajos_java/Info3BibliotecaTP/src/info3bibliotecatp/VerPDFCompletoComoImagen.java</file>
             <file>file:/C:/Users/Crist/Desktop/trabajos_java/Info3BibliotecaTP/src/info3bibliotecatp/Conexion.java</file>
             <file>file:/C:/Users/Crist/Desktop/trabajos_java/Info3BibliotecaTP/src/info3bibliotecatp/UsuarioIniciar.java</file>
             <file>file:/C:/Users/Crist/Desktop/trabajos_java/Info3BibliotecaTP/src/info3bibliotecatp/BibliotecaVentana.java</file>
-            <file>file:/C:/Users/Crist/Desktop/trabajos_java/Info3BibliotecaTP/src/info3bibliotecatp/Comentarios.java</file>
+            <file>file:/C:/Users/Crist/Desktop/trabajos_java/Info3BibliotecaTP/src/info3bibliotecatp/Comentario.java</file>
+            <file>file:/C:/Users/Crist/Desktop/trabajos_java/Info3BibliotecaTP/src/info3bibliotecatp/BienvenidaVentana.java</file>
             <file>file:/C:/Users/Crist/Desktop/trabajos_java/Info3BibliotecaTP/src/info3bibliotecatp/GestionBiblioteca.java</file>
             <file>file:/C:/Users/Crist/Desktop/trabajos_java/Info3BibliotecaTP/src/info3bibliotecatp/GestionUsuarios.java</file>
+            <file>file:/C:/Users/Crist/Desktop/trabajos_java/Info3BibliotecaTP/src/info3bibliotecatp/GestionComentarios.java</file>
         </group>
     </open-files>
 </project-private>

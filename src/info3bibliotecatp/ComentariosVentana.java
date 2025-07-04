@@ -3,6 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package info3bibliotecatp;
+import java.awt.BorderLayout;
+import java.awt.Graphics;
+import java.awt.Image;
 import javax.swing.*;
 import java.util.List;
 /**
@@ -19,7 +22,12 @@ public class ComentariosVentana extends javax.swing.JFrame {
      * Creates new form ComentariosVentana
      */
     public ComentariosVentana(int idLibro, int idUsuario, String tituloLibro) {
+        agregarFondo("/info3bibliotecatp/Imagenes/bookish (7).png");  // cambia la ruta si es necesario
         initComponents();
+        
+        setSize(900, 600);
+        setLocationRelativeTo(null);
+        
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.idLibro = idLibro;
         this.idUsuario = idUsuario;
@@ -143,8 +151,9 @@ public class ComentariosVentana extends javax.swing.JFrame {
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(campoComentario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 23, Short.MAX_VALUE)
-                        .addComponent(botonComentar))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(botonComentar)
+                        .addContainerGap())))
         );
 
         pack();
@@ -169,13 +178,20 @@ public class ComentariosVentana extends javax.swing.JFrame {
 
     private void jButtonPuntuarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPuntuarActionPerformed
         // TODO add your handling code here:
-            int puntuacion = Integer.parseInt(comboPuntuacion.getSelectedItem().toString());
-    GestionComentarios.insertarPuntuacion(idUsuario, idLibro, puntuacion);
+        int puntuacion = Integer.parseInt(comboPuntuacion.getSelectedItem().toString());
+        GestionComentarios.insertarPuntuacion(idUsuario, idLibro, puntuacion);
 
-    double promedio = GestionComentarios.obtenerPromedioPuntuacion(idLibro);
-    jLabelPromedio.setText("Promedio de puntuación: " + String.format("%.2f", promedio));
+        double promedio = GestionComentarios.obtenerPromedioPuntuacion(idLibro);
+        jLabelPromedio.setText("Promedio de puntuación: " + String.format("%.2f", promedio));
     }//GEN-LAST:event_jButtonPuntuarActionPerformed
 
+    private void agregarFondo(String rutaImagen) {
+    FondoPanel fondo = new FondoPanel(rutaImagen);
+    fondo.setLayout(new BorderLayout());
+    setContentPane(fondo);
+}
+
+    
     /**
      * @param args the command line arguments
      */
@@ -192,3 +208,17 @@ public class ComentariosVentana extends javax.swing.JFrame {
     private javax.swing.JLabel labelTituloLibro;
     // End of variables declaration//GEN-END:variables
 }
+class FondoPanel extends JPanel {
+    private Image imagen;
+
+    public FondoPanel(String rutaImagen) {
+        imagen = new ImageIcon(getClass().getResource(rutaImagen)).getImage();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.drawImage(imagen, 0, 0, getWidth(), getHeight(), this);
+    }
+}
+
