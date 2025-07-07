@@ -108,10 +108,12 @@ public class UsuarioIniciar extends javax.swing.JFrame {
         Connection conn = Conexion.conectar();
         if (conn != null) {
             try {
+                String contrasenaEncriptada = GestionUsuarios.encriptarSHA256(contrasena);
+                
                 String sql = "SELECT id, es_admin FROM Usuarios WHERE nombre_usuario = ? AND \"contraseña\" = ?";
                 PreparedStatement stmt = conn.prepareStatement(sql);
                 stmt.setString(1, nombreUsuario.trim());
-                stmt.setString(2, contrasena.trim());
+                stmt.setString(2, contrasenaEncriptada);
                 System.out.println("Usuario ingresado: '" + nombreUsuario + "'");
                 System.out.println("Contraseña ingresada: '" + contrasena + "'");
 

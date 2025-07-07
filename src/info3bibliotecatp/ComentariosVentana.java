@@ -22,7 +22,7 @@ public class ComentariosVentana extends javax.swing.JFrame {
      * Creates new form ComentariosVentana
      */
     public ComentariosVentana(int idLibro, int idUsuario, String tituloLibro) {
-        agregarFondo("/info3bibliotecatp/Imagenes/bookish (7).png");  // cambia la ruta si es necesario
+        agregarFondo("/info3bibliotecatp/Imagenes/bookish (7).png");  
         initComponents();
         
         setSize(900, 600);

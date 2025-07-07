@@ -37,21 +37,23 @@ public class BibliotecaVentana extends javax.swing.JFrame {
     private boolean esAdmin;
 
     public BibliotecaVentana(String nombreUsuario, int idUsuario, boolean esAdmin) {
-    jPanel1 = new FondoPanelMiBiblioteca();
-    jPanel2 = new FondoPanelLibrosDisp();
-    
+    jPanel1 = new JPanel();
+    jPanel2 = new JPanel();
+    this.nombreUsuario = nombreUsuario;
+    this.idUsuario=idUsuario;
+    this.esAdmin=esAdmin;
     initComponents();
-    
+    jPanel1.setOpaque(false);
     jPanel1.setLayout(new BorderLayout());
+    jPanel1.add(new FondoPanelMiBiblioteca(), BorderLayout.CENTER);
+    jPanel2.setOpaque(false);
     jPanel2.setLayout(new BorderLayout());
-
+    jPanel2.add(new FondoPanelLibrosDisp(), BorderLayout.CENTER);
+    
     setSize(900, 600);
     setLocationRelativeTo(null);
     
     this.listaLibrosDisponibles = new ArrayList<>();
-    this.nombreUsuario = nombreUsuario;
-    this.idUsuario=idUsuario;
-    this.esAdmin=esAdmin;
     
     DefaultListModel<Libro> modeloBiblioteca = new DefaultListModel<>();
     jList1 = new javax.swing.JList<>();
@@ -68,7 +70,9 @@ public class BibliotecaVentana extends javax.swing.JFrame {
     agregarDobleClickParaAbrirPDF(jList2); // mi biblio
     
     jLabel1.setText("Biblioteca personal de: " + nombreUsuario);
-    jButton1.setVisible(esAdmin);
+    jButton1.setVisible(esAdmin); //muestra solo al admin
+    
+    botonEliminarLibro.setVisible(esAdmin);
     
     jLabelPortada.setPreferredSize(new Dimension(150, 200));
     jLabelPortada.setMinimumSize(new Dimension(150, 200));
@@ -313,6 +317,14 @@ System.out.println("esAdmin: " + esAdmin);
             }
         });
 
+        botonEliminarLibro = new javax.swing.JButton("Eliminar libro");
+        botonEliminarLibro.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                eliminarLibroSeleccionado();
+            }
+        });
+        botonEliminarLibro.setVisible(esAdmin);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -320,11 +332,13 @@ System.out.println("esAdmin: " + esAdmin);
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(93, 93, 93)
                 .addComponent(verComentariosLibros)
-                .addGap(137, 137, 137)
+                .addGap(18, 18, 18)
                 .addComponent(jButton1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton2)
-                .addGap(29, 29, 29))
+                .addGap(18, 18, 18)
+                .addComponent(botonEliminarLibro)
+                .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap(20, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -370,7 +384,8 @@ System.out.println("esAdmin: " + esAdmin);
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(verComentariosLibros)
-                    .addComponent(jButton2))
+                    .addComponent(jButton2)
+                    .addComponent(botonEliminarLibro))
                 .addGap(21, 21, 21))
         );
 
@@ -508,6 +523,34 @@ System.out.println("esAdmin: " + esAdmin);
     }
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    private void eliminarLibroSeleccionado() {
+    Libro libroSeleccionado = jList2.getSelectedValue();
+    if (libroSeleccionado == null) {
+        JOptionPane.showMessageDialog(this, "Seleccioná un libro primero.");
+        return;
+    }
+
+    int confirmacion = JOptionPane.showConfirmDialog(this,
+        "¿Estás seguro de que querés eliminar este libro? Esta acción no se puede deshacer.",
+        "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+
+    if (confirmacion == JOptionPane.YES_OPTION) {
+        boolean eliminado = GestionBiblioteca.eliminarLibroPorId(libroSeleccionado.getIdLibro());
+        if (eliminado) {
+            JOptionPane.showMessageDialog(this, "Libro eliminado correctamente.");
+            cargarLibrosDisponibles();
+            cargarLibros(); // Refrescar también tu biblioteca personal por si estaba agregado
+            File pdf = new File(libroSeleccionado.getRutaPDF());
+            File portada = new File(libroSeleccionado.getRutaPortada());
+            if (pdf.exists()) pdf.delete();
+            if (portada.exists()) portada.delete();
+        } else {
+            JOptionPane.showMessageDialog(this, "Error al eliminar el libro.");
+        }
+    }
+}
+
+    
     private void verComentariosLibrosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verComentariosLibrosActionPerformed
         // TODO add your handling code here:
     Libro libroSeleccionado = jList2.getSelectedValue();  
@@ -547,7 +590,7 @@ System.out.println("esAdmin: " + esAdmin);
     private void botonBuscarLibroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonBuscarLibroActionPerformed
         // TODO add your handling code here:
         
-     String textoBusqueda = campoBusquedaLibro.getText().trim().toLowerCase(); // ⚠️ trim agregado
+     String textoBusqueda = campoBusquedaLibro.getText().trim().toLowerCase(); 
     modeloLibros.clear();
 
     List<Libro> librosDisponibles = GestionBiblioteca.obtenerLibrosDisponibles();
@@ -614,6 +657,7 @@ private void agregarDobleClickParaAbrirPDF(JList<Libro> lista) {
     private DefaultListModel<Libro> modeloLibros;
     private JList<Libro> jList1;
     private JList<Libro> jList2;
+    private javax.swing.JButton botonEliminarLibro;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton ComentarLiibro;

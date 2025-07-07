@@ -229,33 +229,6 @@ public static Libro obtenerLibroPorTitulo(String titulo) {
     return null;
 }
 
-public static List<Libro> obtenerTodosLosLibros() {
-    List<Libro> listaLibros = new ArrayList<>();
-
-    String sql = "SELECT * FROM libros"; 
-
-    try (Connection conn = Conexion.conectar();
-         PreparedStatement stmt = conn.prepareStatement(sql);
-         ResultSet rs = stmt.executeQuery()) {
-
-        while (rs.next()) {
-            int id = rs.getInt("id");
-            String titulo = rs.getString("titulo");
-            String autor = rs.getString("autor");
-            String rutaArchivo = rs.getString("ruta_archivo");
-            String rutaPortada = rs.getString("ruta_portada");
-
-            Libro libro = new Libro(id, titulo, autor, rutaArchivo, rutaPortada);
-            listaLibros.add(libro);
-        }
-
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-
-    return listaLibros;
-}
-
 public static List<Libro> obtenerLibrosDisponibles() {
     List<Libro> libros = new ArrayList<>();
 
@@ -282,6 +255,38 @@ public static List<Libro> obtenerLibrosDisponibles() {
 
     return libros;
 }
+
+public static boolean eliminarLibroPorId(int idLibro) {
+    try (Connection conn = Conexion.conectar()) {
+        conn.setAutoCommit(false);  // Inicia transacción
+
+        String[] sqls = {
+            "DELETE FROM biblioteca_usuarios WHERE id_libro = ?",
+            "DELETE FROM comentarios WHERE id_libro = ?",
+            "DELETE FROM calificaciones WHERE id_libro = ?",
+            "DELETE FROM libros WHERE id = ?"
+        };
+
+        for (String sql : sqls) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, idLibro);
+                stmt.executeUpdate();
+            }
+        }
+
+        conn.commit();  // Todo OK
+        return true;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        try (Connection conn = Conexion.conectar()) {
+            if (conn != null) conn.rollback();  // Revierte si hay error
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return false;
+    }
+}
+
 
 
 }
